@@ -26,7 +26,7 @@ Both builds use the same firmware and the same switch wiring. Only the power sid
 - Five saved presets per pedal, switchable from the web UI
 - First-boot Wi-Fi setup through a captive portal. No credentials are compiled into the firmware
 - Settings persist across reboots (ESP32 NVS)
-- OTA firmware updates
+- OTA support in the firmware (needs a partition scheme with an OTA slot, see below)
 - Handles both pedals held at once without stuck modifiers
 
 ### One pedal or two
@@ -44,8 +44,13 @@ The other `.ino` files in this repo are earlier iterations and are kept for refe
 | Setting | Value |
 | --- | --- |
 | Board | ESP32 Dev Module |
+| Partition Scheme | **Huge APP (3MB No OTA/1MB SPIFFS)** |
 | Library: ESP32 BLE Keyboard | by T-vK |
 | Library: WiFiManager | by tzapu |
+
+**The sketch must be flashed with the Huge APP partition scheme** (Tools > Partition Scheme in the Arduino IDE). BLE, Wi-Fi, the web server and WiFiManager together are too large for the default partition, so with the default scheme the upload fails with a "sketch too big" error.
+
+Huge APP has no spare partition for over-the-air updates, so flash over USB. See the OTA note under Usage notes.
 
 The Arduino IDE expects a sketch to live in a folder with the same name. Put the file in a folder called `esp32_foot_pedal_wifi_setup_guided/` before opening it.
 
@@ -141,7 +146,7 @@ flowchart LR
 
 **Wi-Fi is optional.** If the portal times out or no network is available, Bluetooth still works. The web UI and OTA only start once Wi-Fi is connected. Reboot to try setup again.
 
-**OTA updates.** The device appears as `esp32-pedal` on your network and can be selected as a network port in the Arduino IDE.
+**OTA updates.** The sketch includes ArduinoOTA and the device appears as `esp32-pedal` on your network. OTA only works if the board was flashed with a partition scheme that includes an OTA slot. With Huge APP (required for the first flash) there is no OTA slot, so update the firmware over USB.
 
 **Security.** The web interface and OTA have no password. Only use the pedal on a network you trust.
 
