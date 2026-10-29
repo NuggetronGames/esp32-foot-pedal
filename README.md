@@ -45,8 +45,77 @@ The other `.ino` files in this repo are earlier iterations and are kept for refe
 | --- | --- |
 | Board | ESP32 Dev Module |
 | Partition Scheme | **Huge APP (3MB No OTA/1MB SPIFFS)** |
-| Library: ESP32 BLE Keyboard | by T-vK |
-| Library: WiFiManager | by tzapu |
+| ESP32 board package | esp32 by Espressif Systems (3.x, built with 3.3.12) |
+| Library: ESP32 BLE Keyboard | by T-vK, installed from a ZIP (see below) |
+| Library: WiFiManager | by tzapu, installed from the Library Manager |
+
+### Installing the libraries
+
+Everything else the sketch includes (`WiFi`, `WebServer`, `ArduinoOTA`, `Preferences`, `BLE` and so on) ships with the ESP32 board package. Don't install those separately.
+
+**1. ESP32 board package** (skip if `ESP32 Dev Module` is already in your board list)
+
+1. Open **File > Preferences** and add this to "Additional boards manager URLs":
+   `https://espressif.github.io/arduino-esp32/package_esp32_index.json`
+2. Open **Tools > Board > Boards Manager**, search for `esp32` and install **esp32 by Espressif Systems**.
+
+**2. WiFiManager**
+
+1. Open the Library Manager (`Ctrl+Shift+I`).
+2. Search for `WiFiManager` and install the one **by tzapu**. Choose **Install All** if it asks about dependencies.
+
+**3. ESP32 BLE Keyboard (T-vK)**
+
+This library isn't reliably available in the Library Manager, and similarly named libraries from other authors don't provide `BleKeyboard.h`, so install the original from GitHub.
+
+1. Go to https://github.com/T-vK/ESP32-BLE-Keyboard and choose **Code > Download ZIP**.
+2. In the Arduino IDE, choose **Sketch > Include Library > Add .ZIP Library...** and select the ZIP.
+3. Restart the IDE.
+
+### Patching BleKeyboard.cpp (required on ESP32 core 3.x)
+
+Version 3.x of the ESP32 board package changed the BLE library to take Arduino `String` instead of `std::string`. T-vK's library still passes `std::string`, so it fails to compile with errors like:
+
+```
+BleKeyboard.cpp:106:19: error: cannot convert 'std::string' to 'String'
+BleKeyboard.cpp:117:32: error: no matching function for call to 'BLECharacteristic::setValue(std::string&)'
+```
+
+Two lines need to be changed. Open this file in any text editor:
+
+```
+C:\Users\<you>\Documents\Arduino\libraries\ESP32_BLE_Keyboard\BleKeyboard.cpp
+```
+
+Around line 106, change:
+
+```cpp
+BLEDevice::init(deviceName);
+```
+
+to:
+
+```cpp
+BLEDevice::init(String(deviceName.c_str()));
+```
+
+Around line 117, change:
+
+```cpp
+hid->manufacturer()->setValue(deviceManufacturer);
+```
+
+to:
+
+```cpp
+hid->manufacturer()->setValue(String(deviceManufacturer.c_str()));
+```
+
+Save the file and compile again. The patch lives in your local library folder, so reinstalling or updating the library overwrites it and you'll need to reapply it.
+
+If you'd rather not patch, downgrading the board package to 2.0.17 lets the stock library compile, but the sketch's other libraries target the 3.x core, so patching is the simpler path.
+
+**First compile is slow.** On a fresh install the first build can take several minutes while the IDE compiles the ESP32 core. Later builds reuse the cache and take seconds.
 
 **The sketch must be flashed with the Huge APP partition scheme** (Tools > Partition Scheme in the Arduino IDE). BLE, Wi-Fi, the web server and WiFiManager together are too large for the default partition, so with the default scheme the upload fails with a "sketch too big" error.
 
