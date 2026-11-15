@@ -1,0 +1,2 @@
+# Keep the library file byte-for-byte
+patched-libraries/**/*.cpp -text
