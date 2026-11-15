@@ -226,4 +226,4 @@ flowchart LR
 
 ## License
 
-No license has been chosen yet.
+The sketches are released under the [MIT License](LICENSE). Compiled firmware also includes third-party code under its own licenses. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
