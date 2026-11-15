@@ -1,4 +1,6 @@
-# This guide is no longer maintained. Please visit [https://macro.printplease.store](https://macro.printplease.store) for the latest setup guide.
+# This guide is no longer maintained. 
+Please visit [https://macro.printplease.store](https://macro.printplease.store) for the latest setup guide.
+The latest firmware will continue to be posted here.
 
 # ESP32 Foot Pedal (up to 2 pedals)
 
