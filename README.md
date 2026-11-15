@@ -72,48 +72,30 @@ This library isn't reliably available in the Library Manager, and similarly name
 2. In the Arduino IDE, choose **Sketch > Include Library > Add .ZIP Library...** and select the ZIP.
 3. Restart the IDE.
 
-### Patching BleKeyboard.cpp (required on ESP32 core 3.x)
+### Replacing BleKeyboard.cpp (required on ESP32 core 3.x)
 
-Version 3.x of the ESP32 board package changed the BLE library to take Arduino `String` instead of `std::string`. T-vK's library still passes `std::string`, so it fails to compile with errors like:
+Version 3.x of the ESP32 board package changed the BLE library to take Arduino `String` instead of `std::string`. T-vK's stock library still passes `std::string`, so it fails to compile with errors like:
 
 ```
 BleKeyboard.cpp:106:19: error: cannot convert 'std::string' to 'String'
 BleKeyboard.cpp:117:32: error: no matching function for call to 'BLECharacteristic::setValue(std::string&)'
 ```
 
-Two lines need to be changed. Open this file in any text editor:
+This repo includes a copy of `BleKeyboard.cpp` with those two lines fixed. After installing the library ZIP (step 3 above), copy the patched file over the original:
 
 ```
-C:\Users\<you>\Documents\Arduino\libraries\ESP32_BLE_Keyboard\BleKeyboard.cpp
+patched-libraries/ESP32-BLE-Keyboard/BleKeyboard.cpp
 ```
 
-Around line 106, change:
+into:
 
-```cpp
-BLEDevice::init(deviceName);
+```
+C:\Users\<you>\Documents\Arduino\libraries\ESP32_BLE_Keyboard\
 ```
 
-to:
+and choose to replace the existing file. Restart the IDE. Reinstalling or updating the library overwrites the fix, so copy the file again if that happens. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the file's origin and license status.
 
-```cpp
-BLEDevice::init(String(deviceName.c_str()));
-```
-
-Around line 117, change:
-
-```cpp
-hid->manufacturer()->setValue(deviceManufacturer);
-```
-
-to:
-
-```cpp
-hid->manufacturer()->setValue(String(deviceManufacturer.c_str()));
-```
-
-Save the file and compile again. The patch lives in your local library folder, so reinstalling or updating the library overwrites it and you'll need to reapply it.
-
-If you'd rather not patch, downgrading the board package to 2.0.17 lets the stock library compile, but the sketch's other libraries target the 3.x core, so patching is the simpler path.
+If you'd rather not replace it, downgrading the board package to 2.0.17 lets the stock library compile, but the sketch's other libraries target the 3.x core, so replacing the file is the simpler path.
 
 **First compile is slow.** On a fresh install the first build can take several minutes while the IDE compiles the ESP32 core. Later builds reuse the cache and take seconds.
 
