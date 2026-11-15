@@ -1,3 +1,5 @@
+# This guide is no longer maintained. Please visit [https://macro.printplease.store](https://macro.printplease.store) for the latest setup guide.
+
 # ESP32 Foot Pedal (up to 2 pedals)
 
 A Bluetooth (BLE) foot pedal keyboard built on an ESP32. Each pedal presses a configurable key or key combo on whatever device it's paired with. Keybinds and presets are changed from a small web page served by the pedal itself, and firmware can be updated over Wi-Fi (OTA).
